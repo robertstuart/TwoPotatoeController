@@ -78,15 +78,19 @@ public class MsgReceive {
 		case Common.SEND_DUMP_DATA:
 			mf.dataFile.doDataBlock(val);
 			break;
-		case Common.SEND_STATE:
+		case Common.SEND_STATE:                 // always the last in a series
+			mf.isStateReceived = true;
 			mf.tpState = Integer.valueOf(val);
 			mf.doTpSwingUpdate();               // only one guaranteed to be sent each time.
 			break;
 		case Common.SEND_BATT:
-			mf.tpBatt = Double.valueOf(val);
+			mf.tpBatt = Double.valueOf(val)/100;
 			break;
 		case Common.SEND_MODE:
 			mf.tpMode = Integer.valueOf(val);
+			break;
+		case Common.SEND_ROUTE_NAME:
+			mf.tpRouteName = val;
 			break;
 		default:
 //			System.out.println("Illegal message received: " + cmd);

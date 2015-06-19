@@ -3,6 +3,14 @@ package twoPotatoe;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.event.*;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.nio.charset.Charset;
 import java.text.DecimalFormat;
 
 import javax.swing.*;
@@ -21,7 +29,7 @@ public class TPMainFrame implements ActionListener {
 	private static final int COL2_X = COL1_X + 170;
 	private static final int COL3_X = COL2_X + 110;
 	private static final int COL4_X = COL3_X + 150;
-	private static final int COL5_X = COL4_X + 110;
+	private static final int COL5_X = COL4_X + 50;
 	private static final int COL6_X = COL5_X + 50;
 	private static final int COL7_X = COL6_X + 25;
 	private static final int COL8_X = COL7_X + 70;
@@ -53,6 +61,9 @@ public class TPMainFrame implements ActionListener {
 	public double tpSonarDistance = 0.0;
 	public int tpRouteStep = 0;
 	public int tpValSet = 0;
+	public String tpRouteName = "";
+	
+	public boolean isStateReceived = false;
 	
 	private double oldTpPitch = 0.0;
 	private double oldTpHeading = 0.0;
@@ -64,6 +75,7 @@ public class TPMainFrame implements ActionListener {
 	private int oldTpRouteStep = 0;
 	private int oldTpValSet = 0;
 	private int oldTpDebugVal = 0;
+	private String oldTpRouteName = "";
 
 	public int Val = 4243;
 	public int tpDebugVal = 4244;
@@ -119,6 +131,7 @@ public class TPMainFrame implements ActionListener {
 	JLabel debugVLabel = null;
 	JLabel valsetLabel = null;
 	JLabel valsetV1Label = null;
+	JLabel routeNameValueLabel = null;
 	
 	
 	JToggleButton ledTB = null;
@@ -154,16 +167,17 @@ public class TPMainFrame implements ActionListener {
 	JButton loadTPSeqButton = null;
 	JButton runTPSeqButton = null;
 	JButton runTPSeqDumpButton = null;
-	JButton loadButton = null;
-	JButton startButton = null;
+	JButton prevRouteButton = null;
+	JButton nextRouteButton = null;
 	JSpinner pwSpinner = null;
 	JSpinner wsSpinner = null;
 	JSpinner wsPwSpinner = null;
 	JLabel seqStatLabel = null;
 	JTextArea textArea = null;
 	JToggleButton startRouteTB = null;
+	JButton loadRouteButton = null;
 	JButton endStandButton = null;
-
+	JFileChooser fc = null;
 	long lastTick = 0;
 	long total = 0;
 	long tickRollover = 0;
@@ -211,7 +225,7 @@ public class TPMainFrame implements ActionListener {
 		mainFrame.setLayout(null);
 		mainFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
-		blueTooth = new BlueTooth();//.open();
+		blueTooth = new BlueTooth(this);//.open();
 		msgReceive = new MsgReceive(this);
 		blueTooth.initialize(msgReceive);
 		dataFile = new DataFile(this);
@@ -380,7 +394,7 @@ public class TPMainFrame implements ActionListener {
 		battV1Label.setHorizontalAlignment(SwingConstants.RIGHT);
 		mainFrame.add(battV1Label);
 		battV2Label = new JLabel();
-		battV2Label.setBounds(COL1_X3, rowY, COL1_TPV2LABEL_WIDTH, TB_HEIGHT);
+		battV2Label.setBounds(COL1_X3+10, rowY, COL1_TPV2LABEL_WIDTH, TB_HEIGHT);
 		battV2Label.setHorizontalAlignment(SwingConstants.RIGHT);
 		mainFrame.add(battV2Label);
 		rowY += ROW_HEIGHT;
@@ -592,7 +606,8 @@ public class TPMainFrame implements ActionListener {
 		});
 		mainFrame.add(runTPSeqDumpButton);
 		rowY += ROW_HEIGHT;
-
+		
+		// Y Slider
 		ySlider = new JSlider(JSlider.VERTICAL, 0, 200, 100);
 		ySlider.setBounds(COL5_X, 25, 20, 200);
 		ySlider.addChangeListener(new ChangeListener() {
@@ -630,119 +645,59 @@ public class TPMainFrame implements ActionListener {
 
 		//
 		rowY = TOP_MARGIN;
-		loadButton = new JButton("Load");
-		Dimension loadSize = loadButton.getPreferredSize();
-		loadButton.setBounds(COL7_X, rowY, loadSize.width, TB_HEIGHT);
-		loadButton.setEnabled(false);
-		mainFrame.add(loadButton);
-
-		startButton = new JButton("Start");
-		Dimension startSize = startButton.getPreferredSize();
-		startButton.setBounds(COL7_X + loadSize.width + 12, rowY,
-				startSize.width, TB_HEIGHT);
-		startButton.setEnabled(false);
-		startButton.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-//				cmdSend.send0(Common.CMD_SEQ_START, false);
-//				sequenceIsRunning = true;
-//				seqStatLabel.setText("Active");
-//				algorithmPulseSequence.start();
-			}
-		});
-		mainFrame.add(startButton);
-		rowY += ROW_HEIGHT;
-
-		// Sequence status
-		seqStatLabel = new JLabel("Inactive");
-		Dimension seqStatSize = seqStatLabel.getPreferredSize();
-		seqStatLabel.setBounds(COL7_X + seqStatSize.width + 24, rowY,
-				startSize.width, TB_HEIGHT);
-		mainFrame.add(seqStatLabel);
-		rowY += ROW_HEIGHT;
-
-//		// text field for status/debug messages
-//		textArea = new JTextArea(20, 15);
-//		textArea.setAutoscrolls(true);
-//		JScrollPane scrollPane = new JScrollPane(textArea);
-//		Dimension textSize = scrollPane.getPreferredSize();
-//		scrollPane.setBounds(COL7_X, rowY, textSize.width, textSize.height);
-//		mainFrame.add(scrollPane);
-//		rowY += ROW_HEIGHT;
-
-		// Route Buttons
-		JButton route1Button = new JButton("Load Route 1");
-		Dimension routeSize = route1Button.getPreferredSize();
-		route1Button.setBounds(COL7_X, rowY, routeSize.width, TB_HEIGHT);
-		startButton.setEnabled(true);
-		route1Button.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-//				algorithmTp5.loadRoute("Route1.csv");
-			}
-		});
-		mainFrame.add(route1Button);
-		rowY += ROW_HEIGHT;
-
-		JButton route2Button = new JButton("Load Route 2");
-		route2Button.setBounds(COL7_X, rowY, routeSize.width, TB_HEIGHT);
-		route2Button.setEnabled(true);
-		route2Button.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-//				algorithmTp5.loadRoute("Route2.csv");
-			}
-		});
-		mainFrame.add(route2Button);
-		rowY += ROW_HEIGHT;
-
-		JButton route3Button = new JButton("Load Route 3");
-		route3Button.setBounds(COL7_X, rowY, routeSize.width, TB_HEIGHT);
-		route3Button.setEnabled(true);
-		route3Button.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-//				algorithmTp5.loadRoute("Route3.csv");
-			}
-		});
-		mainFrame.add(route3Button);
-		rowY += ROW_HEIGHT;
-
-		JButton route4Button = new JButton("Load Route 4");
-		route4Button.setBounds(COL7_X, rowY, routeSize.width, TB_HEIGHT);
-		route4Button.setEnabled(true);
-		route4Button.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-//				algorithmTp5.loadRoute("Route4.csv");
-			}
-		});
-		mainFrame.add(route4Button);
-		rowY += ROW_HEIGHT;
-
-		JButton route5Button = new JButton("Load Route 5");
-		route5Button.setBounds(COL7_X, rowY, routeSize.width, TB_HEIGHT);
-		route5Button.setEnabled(true);
-		route5Button.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-//				algorithmTp5.loadRoute("Route5.csv");
-			}
-		});
-		mainFrame.add(route5Button);
-		rowY += ROW_HEIGHT;
-		rowY += ROW_HEIGHT;
 		
-		startRouteTB = new JToggleButton("Route");
-		Dimension startRouteSize = route1Button.getPreferredSize();
-		startRouteTB.setBounds(COL7_X, rowY, startRouteSize.width, TB_HEIGHT);
-		startRouteTB.setEnabled(true);
-		startRouteTB.addActionListener(new ActionListener() {
+		// Alive
+		JLabel routeNameLabel = new JLabel("Route:");
+		Dimension routeNameSize = routeNameLabel.getPreferredSize();
+		routeNameLabel.setBounds(COL6_X, rowY, routeNameSize.width, TB_HEIGHT);
+		routeNameValueLabel = new JLabel();
+		routeNameValueLabel.setBounds(COL6_X + routeNameSize.width + 5, rowY,
+				COL4_VLABEL_WIDTH + 44, TB_HEIGHT);
+		routeNameValueLabel.setHorizontalAlignment(SwingConstants.LEFT);
+		routeNameValueLabel.setText("");
+		mainFrame.add(routeNameLabel);
+		mainFrame.add(routeNameValueLabel);
+		rowY += ROW_HEIGHT;
+
+		
+		prevRouteButton = new JButton("< Previous");
+		Dimension prevRouteSize = prevRouteButton.getPreferredSize();
+		prevRouteButton.setBounds(COL7_X, rowY, prevRouteSize.width, TB_HEIGHT);
+		prevRouteButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				int x = startRouteTB.isSelected() ? 1 : 0;
-				blueTooth.send(Common.TP_RCV_MSG_ROUTE, x);
+				blueTooth.send(Common.RCV_SET_ROUTE,0);
 			}
 		});
-		mainFrame.add(startRouteTB);
+		mainFrame.add(prevRouteButton);
+
+		nextRouteButton = new JButton("Next >");
+		Dimension nextRouteSize = nextRouteButton.getPreferredSize();
+		nextRouteButton.setBounds(COL7_X + nextRouteSize.width + 12, rowY,
+				nextRouteSize.width, TB_HEIGHT);
+		nextRouteButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				blueTooth.send(Common.RCV_SET_ROUTE,1);
+			}
+		});
+		mainFrame.add(nextRouteButton);
+		rowY += ROW_HEIGHT;
+		rowY += ROW_HEIGHT;
+
+		final JToggleButton runRouteTB = new JToggleButton("Run Route");
+		Dimension  runRouteSize =  runRouteTB.getPreferredSize();
+		runRouteSize.setSize(140, runRouteSize.height);
+		runRouteTB.setBounds(COL7_X, rowY,  runRouteSize.width, TB_HEIGHT);
+		runRouteTB.setEnabled(true);
+		runRouteTB.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				blueTooth.send(Common.RCV_ROUTE, runRouteTB.isSelected() ? 1 : 0);
+			}
+		});
+		mainFrame.add(runRouteTB);
 		rowY += ROW_HEIGHT;
 		
 		endStandButton = new JButton("End Stand");
-		Dimension endStandSize = route1Button.getPreferredSize();
-		endStandButton.setBounds(COL7_X, rowY, endStandSize.width, TB_HEIGHT);
+		endStandButton.setBounds(COL7_X, rowY, runRouteSize.width, TB_HEIGHT);
 		endStandButton.setEnabled(true);
 		endStandButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -750,6 +705,64 @@ public class TPMainFrame implements ActionListener {
 			}
 		});
 		mainFrame.add(endStandButton);
+		rowY += ROW_HEIGHT;
+		rowY += ROW_HEIGHT;
+
+		loadRouteButton = new JButton("Load Route");
+		loadRouteButton.setBounds(COL7_X, rowY, runRouteSize.width, TB_HEIGHT);
+		loadRouteButton.setEnabled(true);
+		
+		fc = new JFileChooser("C:/TPRoute");
+		fc.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
+		
+		loadRouteButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+		           int returnVal = fc.showOpenDialog(mainFrame);
+		           
+		            if (returnVal == JFileChooser.APPROVE_OPTION) {
+		                loadRoute(fc.getSelectedFile());
+		                //This is where a real application would open the file.
+			   } 
+			}
+		});
+		mainFrame.add(loadRouteButton);
+		rowY += ROW_HEIGHT;
+
+		JButton deleteRouteButton = new JButton("Delete Route");
+		deleteRouteButton.setBounds(COL7_X, rowY, runRouteSize.width, TB_HEIGHT);
+		deleteRouteButton.setEnabled(true);
+		deleteRouteButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+//				algorithmTp5.loadRoute("Route4.csv");
+			}
+		});
+		mainFrame.add(deleteRouteButton);
+		rowY += ROW_HEIGHT;
+
+//		JButton route5Button = new JButton("Load Route 5");
+//		route5Button.setBounds(COL7_X, rowY, routeSize.width, TB_HEIGHT);
+//		route5Button.setEnabled(true);
+//		route5Button.addActionListener(new ActionListener() {
+//			public void actionPerformed(ActionEvent e) {
+////				algorithmTp5.loadRoute("Route5.csv");
+//			}
+//		});
+//		mainFrame.add(route5Button);
+//		rowY += ROW_HEIGHT;
+//		rowY += ROW_HEIGHT;
+//		
+//		startRouteTB = new JToggleButton("Route");
+//		Dimension startRouteSize = route1Button.getPreferredSize();
+//		startRouteTB.setBounds(COL7_X, rowY, startRouteSize.width, TB_HEIGHT);
+//		startRouteTB.setEnabled(true);
+//		startRouteTB.addActionListener(new ActionListener() {
+//			public void actionPerformed(ActionEvent e) {
+//				int x = startRouteTB.isSelected() ? 1 : 0;
+//				blueTooth.send(Common.TP_RCV_MSG_ROUTE, x);
+//			}
+//		});
+//		mainFrame.add(startRouteTB);
+//		rowY += ROW_HEIGHT;
 		
 		rowY += ROW_HEIGHT;
 		// Exit button
@@ -817,14 +830,14 @@ public class TPMainFrame implements ActionListener {
 
 	}
 
-	public void lastAlive() {
-		lastAliveMs = System.currentTimeMillis();
-	}
+//	public void lastAlive() {
+//		lastAliveMs = System.currentTimeMillis();
+//	}
 
 	// Called from tp message. Make thread safe.
-	public void aliveCheck() {
-		lastAliveMs = System.currentTimeMillis();
-	}
+//	public void aliveCheck() {
+//		lastAliveMs = System.currentTimeMillis();
+//	}
 
 	// Timer calls actionPerformed
 	public void startJoystickPoll() {
@@ -863,7 +876,7 @@ public class TPMainFrame implements ActionListener {
 		
 		String xs = df.format(controllerX);
 		String ys = df.format(controllerY);
-		blueTooth.sendJoystickXY(xs, ys);
+//		blueTooth.sendJoystickXY(xs, ys);
 	}
 
 	// Callback from getGamepadValues() which is polled in above method
@@ -915,7 +928,7 @@ public class TPMainFrame implements ActionListener {
 
 	void setMode(int newMode) {
 		// Send the message to TP
-		blueTooth.send(Common.TP_RCV_MSG_MODE, newMode);
+		blueTooth.send(Common.RCV_MODE, newMode);
 		// Deactivate the old mode
 		switch (mode) {
 		case Common.MODE_TP_SPEED:
@@ -1021,6 +1034,10 @@ public class TPMainFrame implements ActionListener {
 					oldTpDebugVal = tpDebugVal;
 		            debugVLabel.setText(Integer.toString(tpDebugVal));					
 				}
+				if (!oldTpRouteName.equals(tpRouteName)) {
+					oldTpRouteName = tpRouteName;
+					routeNameValueLabel.setText(tpRouteName); 					
+				}
 				
 			} // End run()
 		});
@@ -1042,6 +1059,48 @@ public class TPMainFrame implements ActionListener {
 		});
 	} // End static main().
 
+	private void loadRoute(File file) {
+	    String line;
+	    InputStream fis;
+	    BufferedReader br;
+		try {
+			    fis = new FileInputStream(file);
+			    InputStreamReader isr = new InputStreamReader(fis, Charset.forName("UTF-8"));
+			    br = new BufferedReader(isr);
+			} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return;
+		}
+		
+		try {
+			while ((line = br.readLine()) != null) {
+				Thread.sleep(50);
+				blueTooth.send(Common.RCV_ROUTE_DATA, line);
+			}
+		} catch (IOException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} 		
+	    try {
+			fis.close();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
+	
+	/************************************************************
+	 * isActive() Message received with 1/10 second?
+	 ***********************************************************/
+	public boolean isActive() {
+		if ((msgTime + 100) > System.currentTimeMillis()) return true;
+		else return false;
+	}
 	
 	int get2Byte(byte[] array, int index) {
 		int b1 = array[index];

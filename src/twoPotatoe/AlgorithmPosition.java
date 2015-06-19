@@ -24,7 +24,7 @@ public class AlgorithmPosition {
 			new SpinnerValues("Backward:", 0.0, 0.0, 100.0, 1.0,  "Tp4.u", new ChangeListener() {  // W
 				public void stateChanged(ChangeEvent e) {
 					double uSpinVal = (double) ((JSpinner) e.getSource()).getValue();
-					bluetooth.send(Common.TP_RCV_MSG_U_VAL, ((int) uSpinVal));
+					bluetooth.send(Common.RCV_U, ((int) uSpinVal));
 				}
 			}),
 		};

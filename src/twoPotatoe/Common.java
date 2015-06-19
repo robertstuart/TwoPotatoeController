@@ -14,6 +14,8 @@ interface Common {
      public static final int SEND_STATE       = 136;
      public static final int SEND_BATT        = 137;
      public static final int SEND_MODE        = 138;
+     public static final int SEND_VALSET      = 139;
+     public static final int SEND_ROUTE_NAME  = 140;
 
      public static final int RCV_JOYX         = 129;
      public static final int RCV_JOYY         = 130;
@@ -29,6 +31,12 @@ interface Common {
      public static final int RCV_X            = 140;
      public static final int RCV_Y            = 141;
      public static final int RCV_Z            = 142;
+     public static final int RCV_SET_ROUTE    = 148;
+     public static final int RCV_ROUTE_DATA   = 149;
+     public static final int RCV_NEXT_ROUTE   = 150;
+     public static final int RCV_DELETE_ROUTE = 151;
+     public static final int RCV_MODE         = 152;
+
 
      public static final int SEND_RCV_TERM    =   0;
 	
@@ -51,37 +59,9 @@ interface Common {
 	public static final int MM_DRIVE_BRAKE =         0;
 	public static final int MM_DRIVE_COAST =         1;
 
-	static final int MAX_RF_PACKET_SIZE = 100;
 	static final long NO_DEBUG = 0x4242;  // If received, not displayed.
 
-	// XBee data packet bytes. Constant indicates offset in packet byte array.
 	
-	// Message\ sent by TP - byte position
-	public static final int TP_SEND_FLAG =             0;  // 1-byte, Flag and packet type
-	public static final int TP_SEND_VALUE =            1;  // 2-byte, value
-	public static final int TP_SEND_SONAR =            3;  // 2-byte, sonar distance
-	public static final int TP_SEND_HEADING =          5;  // 2-byte, sonar distance
-	public static final int TP_SEND_END =              7;  // offset after last value	
-	
-	// Flag byte in TP_SEND_XXX
-	public static final int TP_SEND_FLAG_ANGLE =      0;  // 1-byte, Flag and packet type
-	public static final int TP_SEND_FLAG_SPEED =      1;  
-	public static final int TP_SEND_FLAG_MODE =       2; 
-	public static final int TP_SEND_FLAG_STATE =      3;
-	public static final int TP_SEND_FLAG_BATT =       4;
-	public static final int TP_SEND_FLAG_VALSET =     7;
-	public static final int TP_SEND_FLAG_DEBUG =      8;	
-	public static final int TP_SEND_FLAG_DUMP =      25;
-	
-
-	// Message received by TP - byte position
-	public static final int TP_RCV_MSG_TYPE =        0;  // 1-byte message type or packet type
-	public static final int TP_RCV_MSG_VAL =         1;  // 2-byte message value
-	public static final int TP_RCV_X =               3;  // 1-byte x joystick
-	public static final int TP_RCV_Y =               4;  // 1-byte y joystick
-	public static final int TP_RCV_MAX =             5;
-	
-
 	// Value sets
 	public static final byte VAL_SET_A  =            0;
 	public static final byte VAL_SET_B  =            1;
@@ -111,29 +91,6 @@ interface Common {
 //	public static final byte CMD_STREAM_STATUS =                            3;
 ////                                                                 // limit 16
 	
-	// Values that can go in the TP_RCV_MSG_TYPE byte
-	public static final int TP_RCV_MSG_NULL =        0;  // no message
-	public static final int TP_RCV_MSG_T_VAL =       1;  // 
-	public static final int TP_RCV_MSG_U_VAL =       2;  // 
-	public static final int TP_RCV_MSG_V_VAL =       3;  // 
-	public static final int TP_RCV_MSG_W_VAL =       4;  // 
-	public static final int TP_RCV_MSG_X_VAL =       5;  // 
-	public static final int TP_RCV_MSG_Y_VAL =       6;  // 
-	public static final int TP_RCV_MSG_Z_VAL =       7;  // 
-	public static final int TP_RCV_MSG_BLUE =        8;  // 
-	public static final int TP_RCV_MSG_HOME =        9;  // 
-	public static final int TP_RCV_MSG_LIGHTS =     10;  // 1st 3 bits of val
-	public static final int TP_RCV_MSG_M_MODE =     11;  // 
-	public static final int TP_RCV_MSG_ROUTE_ES =   12;  // Route, end stand
-	public static final int TP_RCV_MSG_ROTATE =     14;    
-	public static final int TP_RCV_MSG_START_PW =   15;  // Run loaded pw sequence.
-	public static final int TP_RCV_MSG_RESET =      16;  // Reset/Start/Stop something
-	public static final int TP_RCV_MSG_MODE =       17;  // Reset/Start/Stop something
-	public static final int TP_RCV_MSG_VALSET =     18;  // Reset/Start/Stop something
-	public static final int TP_RCV_MSG_RUN =        19;  // Reset/Start/Stop something 
-	public static final int TP_RCV_MSG_BLOCK =      20;  // Start block, don't transmit
-	public static final int TP_RCV_MSG_ROUTE =      21;  // Route, Run/Halt
-	public static final int TP_RCV_MSG_DSTART =     22;
 	public static final int TP_RCV_MSG_START_TP =   23;
 
 	// Block types.  Must be non-overlapping with TP_RCV_MSG_xxx

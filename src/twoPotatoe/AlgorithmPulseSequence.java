@@ -30,8 +30,8 @@ public class AlgorithmPulseSequence {
 	// Called for every mode change.
 	public void init(boolean isActive) {
 		this.isActive = isActive;
-		mf.loadButton.setEnabled(isActive);
-		mf.startButton.setEnabled(isActive);
+//		mf.loadButton.setEnabled(isActive);
+//		mf.startButton.setEnabled(isActive);
 		
 //		if (isActive) {
 //			mf.loadButton.addActionListener(new ActionListener() {
@@ -46,58 +46,58 @@ public class AlgorithmPulseSequence {
 	// Called when load button pressed.
 	public void sequenceLoad() {
 //		msgSend.sendCmd(Common.TP_RCV_MSG_BLOCK, 1);
-		// reading file line by line in Java using BufferedReader
-		FileInputStream fis = null;
-		BufferedReader reader = null;
-		byte sendArray[] = new byte[Common.MAX_RF_PACKET_SIZE + 1];
-
-		try {
-			Thread.sleep(100);
-			fis = new FileInputStream("C:/TPData/sequencePulse.csv");
-			// TODO Auto-generated catch block
-			reader = new BufferedReader(new InputStreamReader(fis));
-			reader.readLine(); // skip header line
-
-			while (true) {
-				String line = reader.readLine();
-				if (line == null) {
-					fis.close();
-					break;
-				}
-				int comma1 = line.indexOf(',') + 1;
-				if (comma1 <= 1) {
-					break;
-				}
-				int comma2Index = line.indexOf(',', comma1);
-				int comma2 = comma2Index + 1;
-				if ((comma2 - comma1) <= 1) {
-					break;
-				}
-				int len = line.length();
-				int comma3Index = line.indexOf(',', comma2);
-				if (comma3Index != -1) {
-					len = comma3Index;
-				}
-				int pulseLen = Integer.valueOf(line.substring(comma1, comma2 - 1));
-				int mState = Integer.valueOf(line.substring(comma2, len));
-				
-				System.out.println("pulseLen: " + pulseLen + "   motor: " + mState);
-			    sendArray[0] = Common.TP_BLOCK_PULSE;
-//			    sendArray[1] = (byte) mState;
-//				msgSend.set1Byte(sendArray, 1, mState);
-//				msgSend.set2Byte(sendArray, 2, (pulseLen / 100));
-//				msgSend.sendFrame(sendArray, 4);
-			}
-			fis.close();
-		} catch (Exception e1) {
-			e1.printStackTrace();
-		}
-		// Zero values to end sequence blocks;
-	    sendArray[0] = Common.TP_BLOCK_PULSE;
-//	    sendArray[1] = (byte) mState;
-//		msgSend.set1Byte(sendArray, 1, 0);
-//		msgSend.set2Byte(sendArray, 2, 0);
-//		msgSend.sendFrame(sendArray, 4);
+//		// reading file line by line in Java using BufferedReader
+//		FileInputStream fis = null;
+//		BufferedReader reader = null;
+//		byte sendArray[] = new byte[Common.MAX_RF_PACKET_SIZE + 1];
+//
+//		try {
+//			Thread.sleep(100);
+//			fis = new FileInputStream("C:/TPData/sequencePulse.csv");
+//			// TODO Auto-generated catch block
+//			reader = new BufferedReader(new InputStreamReader(fis));
+//			reader.readLine(); // skip header line
+//
+//			while (true) {
+//				String line = reader.readLine();
+//				if (line == null) {
+//					fis.close();
+//					break;
+//				}
+//				int comma1 = line.indexOf(',') + 1;
+//				if (comma1 <= 1) {
+//					break;
+//				}
+//				int comma2Index = line.indexOf(',', comma1);
+//				int comma2 = comma2Index + 1;
+//				if ((comma2 - comma1) <= 1) {
+//					break;
+//				}
+//				int len = line.length();
+//				int comma3Index = line.indexOf(',', comma2);
+//				if (comma3Index != -1) {
+//					len = comma3Index;
+//				}
+//				int pulseLen = Integer.valueOf(line.substring(comma1, comma2 - 1));
+//				int mState = Integer.valueOf(line.substring(comma2, len));
+//				
+//				System.out.println("pulseLen: " + pulseLen + "   motor: " + mState);
+//			    sendArray[0] = Common.TP_BLOCK_PULSE;
+////			    sendArray[1] = (byte) mState;
+////				msgSend.set1Byte(sendArray, 1, mState);
+////				msgSend.set2Byte(sendArray, 2, (pulseLen / 100));
+////				msgSend.sendFrame(sendArray, 4);
+//			}
+//			fis.close();
+//		} catch (Exception e1) {
+//			e1.printStackTrace();
+//		}
+//		// Zero values to end sequence blocks;
+//	    sendArray[0] = Common.TP_BLOCK_PULSE;
+////	    sendArray[1] = (byte) mState;
+////		msgSend.set1Byte(sendArray, 1, 0);
+////		msgSend.set2Byte(sendArray, 2, 0);
+////		msgSend.sendFrame(sendArray, 4);
 	}
 	
 	// Called when start command sent to TP

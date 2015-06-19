@@ -35,8 +35,8 @@ public class AlgorithmTpSequence {
 	// Called for every mode change.
 	public void init(boolean isActive) {
 		this.isActive = isActive;
-		mf.loadButton.setEnabled(isActive);
-		mf.startButton.setEnabled(isActive);
+//		mf.loadButton.setEnabled(isActive);
+//		mf.startButton.setEnabled(isActive);
 		
 //		if (isActive) {
 //			mf.loadButton.addActionListener(new ActionListener() {

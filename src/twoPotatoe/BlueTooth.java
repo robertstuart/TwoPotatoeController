@@ -16,7 +16,12 @@ public class BlueTooth implements SerialPortEventListener {
     private int msgStrPtr = 0;
     private int msgCmd = 0;
     private boolean isMessageInProgress = true;
-    
+    TPMainFrame mf = null;
+
+    BlueTooth(TPMainFrame jf) {
+		this.mf = jf;
+	}
+
     public void initialize(MsgReceive msgReceive) {
     	this.msgReceive = msgReceive;
     	serialPort = new SerialPort("COM25");
@@ -95,16 +100,15 @@ public class BlueTooth implements SerialPortEventListener {
 	 * 
 	 ********************************************************************/
 	public void send(int cmd, String msg) {
-		if (!isPortActive()) {
+		if (!waitForSend()) {
 			return;
 		}
-		byte buff[] = new byte[msg.length()];
-		for (int i = 0; i < msg.length(); i++) {
-			buff[i] = (byte) msg.charAt(i);
-		}
+		byte buff[] = msg.getBytes();
 			try {
 				serialPort.writeByte((byte) cmd);
-				serialPort.writeBytes(buff);
+				if (buff.length > 0) {
+					serialPort.writeBytes(buff);
+				}
 				serialPort.writeByte((byte) 0);
 			} catch (SerialPortException e) {
 				// TODO Auto-generated catch block
@@ -119,7 +123,7 @@ public class BlueTooth implements SerialPortEventListener {
 	 * 
 	 ********************************************************************/
 	public void send(int cmd, int val) {
-		if (!isPortActive()) {
+		if (!waitForSend()) {
 			return;
 		}
 		String s = String.valueOf(val);
@@ -140,7 +144,7 @@ public class BlueTooth implements SerialPortEventListener {
 	 * 
 	 ********************************************************************/
 	public void send(int cmd, Double val) {
-		if (!isPortActive()) {
+		if (!waitForSend()) {
 			return;
 		}
 		String s = String.valueOf(val);
@@ -165,5 +169,28 @@ public class BlueTooth implements SerialPortEventListener {
 		}
 		if ((x > 50) || (x < 0)) return false;
 		return true;
+	}
+	
+	// Wait for State message before sending.
+	// Returns false if timed out or error
+	private boolean waitForSend() {
+		if (isPortActive() == false) {
+			return false;
+		}
+		mf.isStateReceived = false;
+		long startTime = System.currentTimeMillis();
+		do {
+			try {
+				Thread.sleep(5);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			if (mf.isStateReceived == true) {
+				return true;
+			}
+		} while ((startTime + 200) > System.currentTimeMillis());
+		return false; // time out
+		
 	}
 }

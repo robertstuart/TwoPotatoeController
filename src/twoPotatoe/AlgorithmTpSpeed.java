@@ -11,19 +11,19 @@ public class AlgorithmTpSpeed {
 			new SpinnerValues("Right Wheel:", 0.0, -10.0, 10.0, 0.1, ScreenUpdate.NONE, new ChangeListener() { // T
 				public void stateChanged(ChangeEvent e) {
 					mf.tSpinVal = (double) ((JSpinner) e.getSource()).getValue();					
-					blueTooth.send(Common.TP_RCV_MSG_T_VAL, ((int) (mf.tSpinVal * 1000f)));
+					blueTooth.send(Common.RCV_T, ((int) (mf.tSpinVal * 1000f)));
 				}
 			}),
 			new SpinnerValues("Left Wheel", 0.0, -10.0, 10.0, 0.1, ScreenUpdate.NONE, new ChangeListener() { // U
 				public void stateChanged(ChangeEvent e) {
 					mf.uSpinVal = (double) ((JSpinner) e.getSource()).getValue();					
-					blueTooth.send(Common.TP_RCV_MSG_U_VAL, ((int) (mf.uSpinVal * 1000f)));
+					blueTooth.send(Common.RCV_U, ((int) (mf.uSpinVal * 1000f)));
 				}
 			}),
 			new SpinnerValues("Motor Mode", 0.0, 0.0, 1.0, 1.0, ScreenUpdate.NONE, new ChangeListener() { // U
 				public void stateChanged(ChangeEvent e) {
 					mf.uSpinVal = (double) ((JSpinner) e.getSource()).getValue();					
-					blueTooth.send(Common.TP_RCV_MSG_V_VAL, ((int) (mf.uSpinVal)));
+					blueTooth.send(Common.RCV_V, ((int) (mf.uSpinVal)));
 				}
 			})
 		};
